@@ -11,6 +11,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 },
                 body: JSON.stringify(newMember)
             });
+            
             return await response.json();
         } catch (error) {
             console.error('Error:', error);

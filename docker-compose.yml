@@ -1,20 +1,62 @@
-version: '3'
+version: "3.9"
+
 services:
-  nginx:
-    build: ./nginx
+  backend:
+    build: ./backend
+    command: >
+      sh -c "python manage.py makemigrations &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./backend:/app
     ports:
-      - "8080:80"  # Expose port 8080 for the web server
+      - "8000:8000"
     depends_on:
-      - python_server
-    networks:
-      - webnet
+      postgres:
+        condition: service_healthy
+    environment:
+      - DB_NAME=postgres
+      - DB_USER=postgres
+      - DB_PASSWORD=newpassword
+      - DB_HOST=postgres
 
-  python_server:
-    build: ./python_server
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: newpassword
+      POSTGRES_DB: postgres
     ports:
-      - "8000:8000"  # Expose port 8000 for the Python server
-    networks:
-      - webnet
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-networks:
-  webnet:
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: newpassword
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  ui-app:
+    build: ./ui-app
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    environment:
+      - REACT_APP_BACKEND_URL=http://localhost:8000/api
+
+volumes:
+  postgres_data:
+  pgadmin_data:

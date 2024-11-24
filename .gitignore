@@ -1,0 +1,19 @@
+# Ignorowanie plików konfiguracyjnych i folderów specyficznych dla IDE
+.idea/
+
+# Ignorowanie danych bazy danych
+postgres_data/
+
+# Ignorowanie plików tymczasowych lub cache
+*.pyc
+__pycache__/
+*.log
+
+# Ignorowanie środowisk wirtualnych Pythona
+*.env
+venv/
+env/
+
+# Ignorowanie buildów Docker
+*.pid
+docker-compose.override.yml
